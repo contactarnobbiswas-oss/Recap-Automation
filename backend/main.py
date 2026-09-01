@@ -1,5 +1,12 @@
 import os
+import sys
 import time
+
+# Ensure backend directory is in sys.path for cloud deployments
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -27,7 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 WEB_DIR = os.path.join(PROJECT_DIR, "web")
 DOWNLOADS_DIR = os.path.join(BASE_DIR, "downloads")
@@ -296,4 +302,5 @@ async def generate_tts_voiceover(req: TTSGenerateRequest, user: Dict[str, Any] =
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
