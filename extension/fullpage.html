@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Automation & Pro AI Voice Studio</title>
+  <link rel="stylesheet" href="fullpage.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="logo-area">
+        <i class="fa-solid fa-wand-magic-sparkles logo-icon"></i>
+        <div>
+          <h1>YouTube Pro Studio</h1>
+          <p class="subtitle">Content Automation, AI Rewriting & Edge Neural TTS</p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="api-key-badge" id="apiKeyStatus">
+          <i class="fa-solid fa-key"></i>
+          <span id="apiKeyText">Gemini API Key Set</span>
+        </div>
+        <div class="server-status" id="serverStatus">
+          <span class="status-dot online"></span>
+          <span>Backend Connected</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-navigation">
+      <button class="tab-btn active" data-tab="tab-extractor">
+        <i class="fa-solid fa-cloud-arrow-down"></i>
+        <span>1. Extractor & Metadata</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-rewriter">
+        <i class="fa-solid fa-pen-nib"></i>
+        <span>2. AI Rewriter & Thumbnail</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-voiceover">
+        <i class="fa-solid fa-microphone-lines"></i>
+        <span>3. Voiceover Studio</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- TAB 1: EXTRACTOR -->
+      <section id="tab-extractor" class="tab-content active">
+        <div class="card search-card">
+          <h2><i class="fa-solid fa-link"></i> YouTube URL Extractor</h2>
+          <div class="input-group">
+            <input type="text" id="ytUrlInput" placeholder="Paste YouTube Video URL (e.g. https://www.youtube.com/watch?v=...)" />
+            <button id="btnExtract" class="btn primary-btn">
+              <i class="fa-solid fa-magnifying-glass"></i> Extract Content
+            </button>
+          </div>
+        </div>
+
+        <div id="extractorLoader" class="loader-box hidden">
+          <div class="spinner"></div>
+          <p>Extracting YouTube Video, Metadata & Subtitles (DownSub Engine)...</p>
+        </div>
+
+        <div id="extractorResults" class="results-grid hidden">
+          <!-- Left Column: Video & Thumbnail -->
+          <div class="card">
+            <h3><i class="fa-solid fa-video"></i> Original Video & Details</h3>
+            <div class="video-preview-box">
+              <img id="origThumbnailImg" src="" alt="Thumbnail" class="thumbnail-preview" />
+            </div>
+            <div class="meta-details">
+              <p><strong>Title:</strong> <span id="origTitleText">-</span></p>
+              <p><strong>Channel:</strong> <span id="origChannelText">-</span></p>
+              <p><strong>Duration:</strong> <span id="origDurationText">-</span></p>
+            </div>
+            <div class="action-buttons">
+              <a id="btnDownloadVideo" href="#" target="_blank" class="btn secondary-btn" download>
+                <i class="fa-solid fa-download"></i> Download Video (MP4)
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Column: Raw Transcript & File Upload -->
+          <div class="card">
+            <div class="card-header-flex">
+              <h3><i class="fa-solid fa-file-lines"></i> Original Transcript</h3>
+              <div class="header-actions">
+                <input type="file" id="fileTranscriptInput" accept=".txt,.srt,.vtt" class="hidden" />
+                <button id="btnUploadTranscriptFile" class="btn icon-btn" title="Upload DownSub .txt / .srt File">
+                  <i class="fa-solid fa-file-arrow-up"></i> Upload TXT/SRT
+                </button>
+                <button id="btnCopyRawTranscript" class="btn icon-btn" title="Copy Text">
+                  <i class="fa-regular fa-copy"></i> Copy
+                </button>
+              </div>
+            </div>
+            <textarea id="rawTranscriptText" class="code-textarea" placeholder="Transcript extracted automatically. You can also paste text here or click 'Upload TXT/SRT' to load a DownSub file..."></textarea>
+            
+            <div class="next-step-box">
+              <button id="btnGoToRewrite" class="btn accent-btn full-width">
+                Proceed to Tab 2: AI Rewriter <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: AI REWRITER -->
+      <section id="tab-rewriter" class="tab-content">
+        <div class="card search-card">
+          <div class="card-header-flex">
+            <h2><i class="fa-solid fa-brain"></i> AI Title, Thumbnail & Transcript Rewriter</h2>
+          </div>
+          <div class="config-row">
+            <div class="input-field">
+              <label for="geminiApiKey">Google Gemini API Key:</label>
+              <input type="password" id="geminiApiKey" placeholder="Paste your Gemini API Key here (Saved locally)..." />
+            </div>
+            <div class="checkbox-field">
+              <label><input type="checkbox" id="chkFlipThumb" checked /> Flip Thumbnail & Auto-Enhance Colors</label>
+            </div>
+            <button id="btnStartRewrite" class="btn primary-btn">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Start AI Rewrite
+            </button>
+          </div>
+        </div>
+
+        <div id="rewriteLoader" class="loader-box hidden">
+          <div class="spinner"></div>
+          <p>Rewriting line-by-line transcript & generating single copyright-free title...</p>
+        </div>
+
+        <div id="rewriteResults" class="results-grid hidden">
+          <!-- Column 1: Titles & Thumbnail -->
+          <div class="card">
+            <h3><i class="fa-solid fa-heading"></i> Ultimate Rewritten Title</h3>
+            <p class="subtitle-hint">No commas, colons, or punctuation. Powerful & copyright-free:</p>
+            <div id="singleTitleBox" class="single-title-box">
+              <span id="rewrittenTitleDisplay" class="title-display-text">-</span>
+              <button id="btnCopySingleTitle" class="btn icon-btn" title="Copy Title">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+
+            <hr class="divider">
+
+            <h3><i class="fa-solid fa-image"></i> Redesigned Thumbnail</h3>
+            <div class="thumb-compare-box">
+              <div class="thumb-item">
+                <p><strong>Flipped & Color Enhanced:</strong></p>
+                <img id="processedThumbImg" src="" class="thumbnail-preview" alt="Flipped Thumbnail" />
+                <a id="btnDownloadThumb" href="#" class="btn secondary-btn small-btn full-width-btn" download="rewritten_thumbnail.jpg">
+                  <i class="fa-solid fa-download"></i> Download Thumbnail (Named with Title)
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Rewritten Transcript -->
+          <div class="card">
+            <div class="card-header-flex">
+              <h3><i class="fa-solid fa-check-double"></i> 100% Original Line-by-Line Transcript</h3>
+              <button id="btnCopyRewrittenTranscript" class="btn icon-btn" title="Copy Text">
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
+            </div>
+            <textarea id="rewrittenTranscriptText" class="code-textarea" placeholder="AI rewritten transcript will appear here..."></textarea>
+            
+            <div class="next-step-box">
+              <button id="btnGoToVoiceover" class="btn accent-btn full-width">
+                Send to Tab 3: Generate Voiceover <i class="fa-solid fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: VOICEOVER STUDIO -->
+      <section id="tab-voiceover" class="tab-content">
+        <div class="card">
+          <h2><i class="fa-solid fa-sliders"></i> Microsoft Edge TTS Settings</h2>
+          
+          <div class="voice-settings-grid">
+            <div class="form-group">
+              <label for="voiceSelect"><i class="fa-solid fa-user"></i> Select Edge Neural Voice:</label>
+              <select id="voiceSelect" class="select-input">
+                <option value="en-US-AvaMultilingualNeural">en-US - Ava (Multilingual Female)</option>
+                <option value="en-US-AndrewNeural">en-US - Andrew (Male)</option>
+                <option value="bn-BD-NabanitaNeural">bn-BD - Nabanita (Bengali Female)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="voiceRate"><i class="fa-solid fa-gauge-high"></i> Speed Rate:</label>
+              <select id="voiceRate" class="select-input">
+                <option value="-20%">-20% (Slower)</option>
+                <option value="-10%">-10%</option>
+                <option value="+0%" selected>Normal (+0%)</option>
+                <option value="+10%">+10% (Faster)</option>
+                <option value="+20%">+20%</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="voicePitch"><i class="fa-solid fa-music"></i> Pitch:</label>
+              <select id="voicePitch" class="select-input">
+                <option value="-5Hz">-5Hz (Deeper)</option>
+                <option value="+0Hz" selected>Normal (+0Hz)</option>
+                <option value="+5Hz">+5Hz (Higher)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-flex">
+            <h3><i class="fa-solid fa-file-audio"></i> Script for Voiceover</h3>
+            <span class="badge">Smart Chunking Enabled</span>
+          </div>
+          <textarea id="voiceScriptText" class="code-textarea large-textarea" placeholder="Paste or transfer your rewritten script here..."></textarea>
+
+          <div class="voice-action-bar">
+            <button id="btnGenerateVoice" class="btn primary-btn pulse-btn">
+              <i class="fa-solid fa-circle-play"></i> Generate Professional Voiceover
+            </button>
+          </div>
+        </div>
+
+        <div id="voiceLoader" class="loader-box hidden">
+          <div class="spinner"></div>
+          <p id="voiceStatusMsg">Smart Chunking & Voiceover Generation in Progress...</p>
+        </div>
+
+        <div id="voicePlayerCard" class="card voice-player-card hidden">
+          <h3><i class="fa-solid fa-circle-check"></i> Final Voiceover Audio Ready!</h3>
+          <div class="audio-player-container">
+            <audio id="audioPlayer" controls class="audio-control"></audio>
+            <a id="btnDownloadAudio" href="#" class="btn accent-btn" download>
+              <i class="fa-solid fa-cloud-arrow-down"></i> Download Voiceover (.MP3)
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>YouTube Pro Automation Studio &bull; Private Edition &bull; Powered by FastAPI & Edge TTS</p>
+    </footer>
+  </div>
+
+  <script src="fullpage.js"></script>
+</body>
+</html>

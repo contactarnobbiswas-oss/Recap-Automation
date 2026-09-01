@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recap Automation — Dedicated AI Content Studio</title>
+  <!-- Google Fonts: Inter (SaaS Standard Typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- LOGIN OVERLAY MODAL -->
+  <div id="loginModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="brand-logo mx-auto mb-20"><i class="fa-solid fa-clapperboard"></i></div>
+      <h2 class="login-heading">Recap Automation</h2>
+      <p class="login-subtitle">Sign in to access your automation workspace</p>
+
+      <form id="loginForm" class="mt-28">
+        <div class="form-group mb-18">
+          <label for="loginUsername" class="form-label">USERNAME</label>
+          <input type="text" id="loginUsername" class="form-input" placeholder="Enter your username" required autocomplete="username" />
+        </div>
+        <div class="form-group mb-24">
+          <label for="loginPassword" class="form-label">PASSWORD</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary full-width login-submit-btn">
+          Sign In <i class="fa-solid fa-arrow-right icon-sm"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN CONTROL PANEL MODAL -->
+  <div id="adminModal" class="modal-overlay hidden">
+    <div class="modal-card admin-modal-card">
+      <div class="modal-header">
+        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> Admin Control Panel</h2>
+        <button id="btnCloseAdminModal" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" data-atab="admin-tab-users"><i class="fa-solid fa-users"></i> Editor Accounts</button>
+        <button class="admin-tab-btn" data-atab="admin-tab-logs"><i class="fa-solid fa-clock-rotate-left"></i> Activity Logs</button>
+      </div>
+
+      <div class="admin-content">
+        <!-- Tab 1: User Management -->
+        <div id="admin-tab-users" class="atab-content active">
+          <div class="create-user-box">
+            <h4>Create New Editor Account</h4>
+            <div class="form-row-grid mt-12">
+              <input type="text" id="newEditorUser" placeholder="Username (e.g. editor1)" />
+              <input type="password" id="newEditorPass" placeholder="Password" />
+              <input type="number" id="newEditorLimit" value="5" placeholder="Limit" min="1" max="100" />
+              <button id="btnCreateEditor" class="btn btn-emerald small-btn">
+                <i class="fa-solid fa-user-plus"></i> Create Editor
+              </button>
+            </div>
+          </div>
+
+          <h4 class="mt-24">Editor Accounts & Usage Today</h4>
+          <div class="table-responsive mt-12">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>API Key</th>
+                  <th>Used Today</th>
+                  <th>Daily Limit</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Activity Logs -->
+        <div id="admin-tab-logs" class="atab-content">
+          <h4>Chronological Activity Logs</h4>
+          <div class="table-responsive mt-12">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Video Title / File</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP WRAPPER -->
+  <div class="app-wrapper">
+    <!-- Header Navbar -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-logo"><i class="fa-solid fa-clapperboard"></i></div>
+        <div>
+          <h1 class="brand-title">Recap Automation</h1>
+          <p class="brand-subtitle">AI Content & Voiceover Studio</p>
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <!-- Admin Dashboard Button -->
+        <button id="btnOpenAdmin" class="btn btn-secondary small-btn hidden">
+          <i class="fa-solid fa-sliders"></i> Admin Panel
+        </button>
+
+        <!-- Quota Badge -->
+        <div id="quotaBadge" class="quota-badge">
+          <span class="quota-dot"></span>
+          <span>Quota: <strong id="quotaUsedDisplay">0</strong> / <strong id="quotaLimitDisplay">5</strong> today</span>
+        </div>
+
+        <!-- User Profile Badge -->
+        <div class="user-profile-badge">
+          <i class="fa-solid fa-circle-user avatar-icon"></i>
+          <span id="userNameDisplay">Guest</span>
+          <span id="userRoleBadge" class="role-badge">Editor</span>
+          <button id="btnLogout" class="btn-icon ml-8" title="Log Out"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Global Config Bar -->
+    <section class="card config-card">
+      <div class="config-grid">
+        <div class="setting-item key-item">
+          <label for="userApiKeyInput"><i class="fa-solid fa-key"></i> Personal Gemini API Key:</label>
+          <input type="password" id="userApiKeyInput" placeholder="Paste Gemini API Key..." />
+          <button id="btnSaveUserKey" class="btn btn-secondary small-btn">Save Key</button>
+        </div>
+
+        <div class="setting-item checkbox-item ml-auto">
+          <label><input type="checkbox" id="chkFlipThumb" checked /> Flip Thumbnail & Enhance Colors</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4-STEP SEQUENTIAL WORKFLOW -->
+    <main class="main-container">
+
+      <!-- STEP 1: YouTube Extraction & Downloads -->
+      <section class="card step-card">
+        <div class="step-badge">STEP 01</div>
+        <div class="card-title">
+          <div class="step-icon-bg"><i class="fa-solid fa-video"></i></div>
+          <span>Original Video, Thumbnail & Metadata Extraction</span>
+        </div>
+
+        <div class="url-input-wrapper">
+          <input type="text" id="ytUrlInput" placeholder="Paste YouTube video link here (e.g., https://www.youtube.com/watch?v=...)" />
+          <button id="btnStep1Extract" class="btn btn-primary">
+            <i class="fa-solid fa-cloud-arrow-down"></i> Extract Media & Metadata
+          </button>
+        </div>
+
+        <!-- Step 1 Live Loader -->
+        <div id="step1Loader" class="loader-box hidden mt-16">
+          <div class="spinner"></div>
+          <div class="flex-1">
+            <p id="step1StatusMsg">Extracting media & captions...</p>
+            <div class="timer-badge mt-4"><i class="fa-solid fa-stopwatch"></i> Elapsed: <span id="step1Timer">00:00</span></div>
+          </div>
+        </div>
+
+        <div id="step1Results" class="step-results-box hidden">
+          <div class="grid-2col">
+            <div class="info-block">
+              <p><strong>Original Title:</strong> <span id="origTitleDisplay">-</span></p>
+              <p><strong>Channel:</strong> <span id="origChannelDisplay">-</span></p>
+              <p><strong>Duration:</strong> <span id="origDurationDisplay">-</span></p>
+              <div class="btn-flex mt-16">
+                <a id="btnDownloadOrigVideo" href="#" target="_blank" class="btn btn-secondary small-btn" download>
+                  <i class="fa-solid fa-file-video"></i> Download Video (MP4)
+                </a>
+                <a id="btnDownloadOrigThumb" href="#" target="_blank" class="btn btn-secondary small-btn" download>
+                  <i class="fa-solid fa-image"></i> Download Original Thumbnail
+                </a>
+              </div>
+            </div>
+            <div class="thumb-preview-block">
+              <img id="origThumbImg" src="" class="thumb-preview" alt="Original Thumbnail" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 2: Title & Thumbnail Regeneration -->
+      <section class="card step-card">
+        <div class="step-badge">STEP 02</div>
+        <div class="card-title">
+          <div class="step-icon-bg"><i class="fa-solid fa-pen-to-square"></i></div>
+          <span>Title & Thumbnail Regeneration (Copyright Protection)</span>
+        </div>
+
+        <div class="action-bar">
+          <button id="btnStep2Regenerate" class="btn btn-primary">
+            <i class="fa-solid fa-arrows-rotate"></i> Regenerate Title & Redesign Thumbnail
+          </button>
+        </div>
+
+        <!-- Step 2 Live Loader -->
+        <div id="step2Loader" class="loader-box hidden mt-16">
+          <div class="spinner"></div>
+          <div class="flex-1">
+            <p id="step2StatusMsg">Generating high-CTR viral title & processing thumbnail...</p>
+            <div class="timer-badge mt-4"><i class="fa-solid fa-stopwatch"></i> Elapsed: <span id="step2Timer">00:00</span></div>
+          </div>
+        </div>
+
+        <div id="step2Results" class="step-results-box hidden">
+          <div class="grid-2col">
+            <div>
+              <div class="card-subhead">
+                <span>1 Rewritten Title (Title Case & Punctuation Free):</span>
+                <button id="btnCopyTitle" class="btn-icon" title="Copy Title"><i class="fa-regular fa-copy"></i></button>
+              </div>
+              <div class="single-title-box">
+                <p id="rewrittenTitleDisplay">-</p>
+              </div>
+            </div>
+
+            <div>
+              <div class="card-subhead">
+                <span>Redesigned Thumbnail (Flipped & Enhanced):</span>
+              </div>
+              <img id="processedThumbImg" src="" class="thumb-preview" alt="Redesigned Thumbnail" />
+              <a id="btnDownloadProcessedThumb" href="#" class="btn btn-secondary full-width mt-12" download>
+                <i class="fa-solid fa-download"></i> Download Thumbnail (Auto-Named with Title)
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 3: Subtitle Upload & AI Chunked Script Rewrite -->
+      <section class="card step-card">
+        <div class="step-badge">STEP 03</div>
+        <div class="card-title">
+          <div class="step-icon-bg"><i class="fa-solid fa-file-pen"></i></div>
+          <span>Transcript Upload & AI Chunked Script Rewrite</span>
+        </div>
+
+        <div class="transcript-action-bar mb-20">
+          <div class="header-actions">
+            <!-- 1. Get Transcript Button -->
+            <a href="https://downsub.com/" target="_blank" class="btn btn-secondary">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Get Transcript
+            </a>
+            <!-- 2. Upload TXT / SRT File Button -->
+            <input type="file" id="fileTranscriptInput" accept=".txt,.srt,.vtt" class="hidden" />
+            <button id="btnUploadFile" class="btn btn-secondary">
+              <i class="fa-solid fa-file-arrow-up"></i> Upload TXT / SRT File
+            </button>
+            <!-- 3. AI Rewrite Script Button -->
+            <button id="btnStep3RewriteScript" class="btn btn-primary">
+              <i class="fa-solid fa-brain"></i> AI Rewrite Script (Smart Chunking)
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3 Live Progress Bar & Timer -->
+        <div id="step3Loader" class="loader-box hidden mb-20">
+          <div class="spinner"></div>
+          <div class="flex-1">
+            <div class="progress-header">
+              <span id="step3StatusMsg">AI Rewriting Script (Smart Chunking)...</span>
+              <span id="step3ProgressPercent" class="progress-percent">0%</span>
+            </div>
+            <div class="progress-track mt-6">
+              <div id="step3ProgressBar" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="timer-badge mt-8"><i class="fa-solid fa-stopwatch"></i> Elapsed Time: <span id="step3Timer">00:00</span></div>
+          </div>
+        </div>
+
+        <!-- Vertically Aligned Columns -->
+        <div class="grid-2col">
+          <div class="script-col">
+            <div class="card-subhead-aligned">
+              <span>Original Transcript / Subtitles:</span>
+            </div>
+            <textarea id="rawTranscriptTextarea" class="script-textarea" placeholder="Subtitles extracted automatically from YouTube or uploaded via TXT/SRT file..."></textarea>
+          </div>
+
+          <div class="script-col">
+            <div class="card-subhead-aligned">
+              <span>100% Original Rewritten Script:</span>
+              <button id="btnCopyRewrittenScript" class="btn-icon small-icon-btn" title="Copy Script"><i class="fa-regular fa-copy"></i></button>
+            </div>
+            <textarea id="rewrittenScriptTextarea" class="script-textarea" placeholder="AI rewritten script will appear here..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 4: Edge Voiceover Studio -->
+      <section class="card step-card">
+        <div class="step-badge">STEP 04</div>
+        <div class="card-title">
+          <div class="step-icon-bg"><i class="fa-solid fa-microphone-lines"></i></div>
+          <span>Microsoft Edge Neural Voiceover Studio (Streamlit Smart Chunking)</span>
+        </div>
+
+        <!-- Left: Dropdown Select | Right: Real-time Search Box -->
+        <div class="voice-picker-box mb-16">
+          <div class="form-row-flex">
+            <!-- Left Side: Dropdown -->
+            <div class="select-dropdown-wrapper flex-2">
+              <label class="form-label mb-6">SELECT VOICE CHARACTER:</label>
+              <select id="voiceSelect" class="select-box main-dropdown">
+                <!-- Dynamically populated and filtered -->
+              </select>
+            </div>
+
+            <!-- Right Side: Search Box -->
+            <div class="search-input-field flex-1">
+              <label class="form-label mb-6">SEARCH / FILTER VOICE:</label>
+              <div class="relative-search-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="voiceSearchInput" class="form-input" placeholder="Type voice or language (e.g. Ava, Nabanita)..." />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-action-bar">
+          <button id="btnStep4GenerateVoice" class="btn btn-primary pulse-btn">
+            <i class="fa-solid fa-circle-play"></i> Generate Smart Voiceover (.MP3)
+          </button>
+        </div>
+
+        <!-- Step 4 Live Progress Bar & Timer -->
+        <div id="step4Loader" class="loader-box hidden mt-16">
+          <div class="spinner"></div>
+          <div class="flex-1">
+            <div class="progress-header">
+              <span id="ttsStatusMsg">Executing Streamlit Smart Chunking & Neural Synthesis...</span>
+              <span id="step4ProgressPercent" class="progress-percent">0%</span>
+            </div>
+            <div class="progress-track mt-6">
+              <div id="step4ProgressBar" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="timer-badge mt-8"><i class="fa-solid fa-stopwatch"></i> Elapsed Time: <span id="step4Timer">00:00</span></div>
+          </div>
+        </div>
+
+        <div id="step4Results" class="step-results-box hidden mt-16">
+          <div class="audio-box">
+            <audio id="audioPlayer" controls class="audio-control"></audio>
+            <a id="btnDownloadAudio" href="#" class="btn btn-emerald full-width mt-12" download>
+              <i class="fa-solid fa-cloud-arrow-down"></i> Download Voiceover (.MP3)
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Studio Vertical Centered Footer -->
+    <footer class="footer">
+      <div class="footer-brand-vertical">
+        <div class="brand-logo footer-logo"><i class="fa-solid fa-clapperboard"></i></div>
+        <div class="footer-title">Recap Automation</div>
+        <div class="footer-subtitle">AI Content & Voiceover Studio</div>
+      </div>
+      <div class="footer-copyright">
+        &copy; 2026 Recap Automation &bull; All Rights Reserved
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

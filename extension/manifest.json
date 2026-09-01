@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Content Automation & Voice Studio",
+  "version": "1.0.0",
+  "description": "Extract YouTube content, rewrite titles & line-by-line transcripts with AI, redesign thumbnails, and generate Edge Neural voiceovers.",
+  "action": {
+    "default_title": "Open YouTube Automation Studio",
+    "default_icon": "icons/icon48.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "downloads"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
